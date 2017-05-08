@@ -17,12 +17,14 @@ class FullyConnect(Layer):
     def __init__(self, units, input_shape):
         super(FullyConnect, self).__init__(input_shape, units)
         self.W = np.random.uniform(-1, 1, (input_shape, units))
+        self.bias = np.random.uniform(-1, 1, 1)
 
 
     def forward(self, x):
         for i in range(self.input_shape):
             for j in range(self.units):
                 self.Y[j] += x[i]*self.W[i][j]
+        self.Y += self.bias
         return self.Y
 
     def backword(self):
