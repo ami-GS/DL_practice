@@ -1,6 +1,6 @@
 import numpy as np
 from activation import Activation
-from loss import Loss
+from loss import MSE
 
 class Network:
     def __init__(self, layers=None):
@@ -11,7 +11,7 @@ class Network:
             layer = self.layers[i]
             if i >= 1:
                 layer.input_shape = units
-                if isinstance(layer, Activation) or isinstance(layer, Loss):
+                if isinstance(layer, Activation):
                     layer.units = units
             layer.Y = np.zeros(layer.units)
             units = layer.units
@@ -19,13 +19,10 @@ class Network:
         # current value
         self.Y = None
 
-    def train(self, X, label):
+    def train(self, X, label, loss=MSE()):
         self.Y = X
         for layer in self.layers:
-            if not isinstance(layer, Loss):
-                self.Y = layer.forward(self.Y)
+            self.Y = layer.forward(self.Y)
 
-        if isinstance(layer, Loss):
-            err = layer.calc(self.Y, label)
-            
-        return err
+        err_delta = loss.partial_derivative(self.Y, label)
+        return err_delta
