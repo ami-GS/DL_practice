@@ -25,4 +25,8 @@ class Network:
             self.Y = layer.forward(self.Y)
 
         err_delta = loss.partial_derivative(self.Y, label)
+        for layer in self.layers[::-1]:
+            pass
+            #layer.backword()
+
         return err_delta

@@ -17,4 +17,4 @@ class Sigmoid(Activation):
         return self.Y
 
     def backward(self):
-        pass
+        return self.Y * (1 - self.Y)

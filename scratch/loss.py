@@ -26,5 +26,5 @@ class MSE(Loss):
         return np.sum(Y)*0.5
 
 
-        return np.sum(self.Y)/2
-            
+    def partial_derivative(self, X, label):
+        return - (label - X)
