@@ -13,7 +13,9 @@ class Network:
                 layer.input_shape = units
                 if isinstance(layer, Activation):
                     layer.units = units
+            layer.X = np.zeros(layer.input_shape)
             layer.Y = np.zeros(layer.units)
+            layer.E = np.zeros(layer.units)
             units = layer.units
 
         # current value
@@ -24,9 +26,9 @@ class Network:
         for layer in self.layers:
             self.Y = layer.forward(self.Y)
 
+        err = loss.calc(self.Y, label)
         err_delta = loss.partial_derivative(self.Y, label)
         for layer in self.layers[::-1]:
-            pass
-            #layer.backword()
+            err_delta = layer.backward(err_delta)
 
         return err_delta
