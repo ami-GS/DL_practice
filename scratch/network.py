@@ -21,7 +21,7 @@ class Network:
         # current value
         self.Y = None
 
-    def train(self, X, label, loss=MSE()):
+    def train(self, X, label, loss=MSE(), learning_rate=0.02):
         self.Y = X
         for layer in self.layers:
             self.Y = layer.forward(self.Y)
@@ -31,4 +31,7 @@ class Network:
         for layer in self.layers[::-1]:
             err_delta = layer.backward(err_delta)
 
-        return err_delta
+        for layer in self.layers[::-1]:
+            layer.update(learning_rate)
+
+        return err

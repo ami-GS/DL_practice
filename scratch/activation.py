@@ -5,6 +5,8 @@ class Activation(Layer):
     def __init__(self):
         super(Activation, self).__init__()
     
+    def update(self, learning_rate):
+        pass
 
 class Sigmoid(Activation):
     def __init__(self):
