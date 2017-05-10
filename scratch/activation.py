@@ -21,5 +21,5 @@ class Sigmoid(Activation):
     def backward(self, err_delta, learning_rate):
         self.E = err_delta
         for i in range(self.units):
-            err_delta[i] = self.Y[i] * (1 - self.Y[i])
+            err_delta[i] *= self.Y[i] * (1 - self.Y[i])
         return err_delta
