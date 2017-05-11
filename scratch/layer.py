@@ -11,10 +11,10 @@ class Layer(object):
         # error
         self.E = np.zeros(units)
 
-    def forward(self):
+    def forward(self, x):
         pass
 
-    def backward(self):
+    def backward(self, err_delta, learning_rate):
         pass
 
 
