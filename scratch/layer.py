@@ -40,9 +40,9 @@ class FullyConnect(Layer):
         for i in range(self.input_shape):
             for j in range(self.units):
                 err_delta[i] += self.E[j] * self.W[i][j]
-        return err_delta
 
-    def update(self, learning_rate):
         for i in range(self.units):
             for j in range(self.input_shape):
-                self.W[j][i] -= learning_rate * self.E[i] * self.X[j]
+                self.W[j][i] -= 0.02 * self.E[i] * self.X[j]
+
+        return err_delta

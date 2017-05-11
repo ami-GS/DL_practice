@@ -31,7 +31,4 @@ class Network:
         for layer in self.layers[::-1]:
             err_delta = layer.backward(err_delta)
 
-        for layer in self.layers[::-1]:
-            layer.update(learning_rate)
-
         return err
