@@ -21,6 +21,12 @@ class Network:
         # current value
         self.Y = None
 
+    def predict(self, X):
+        self.Y = X
+        for layer in self.layers:
+            self.Y = layer.forward(self.Y)
+        return self.Y
+
     def train(self, X, label, loss=MSE(), learning_rate=0.02):
         self.Y = X
         for layer in self.layers:
