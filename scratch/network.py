@@ -29,6 +29,6 @@ class Network:
         err = loss.calc(self.Y, label)
         err_delta = loss.partial_derivative(self.Y, label)
         for layer in self.layers[::-1]:
-            err_delta = layer.backward(err_delta)
+            err_delta = layer.backward(err_delta, learning_rate)
 
         return err

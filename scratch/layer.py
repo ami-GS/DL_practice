@@ -34,7 +34,7 @@ class FullyConnect(Layer):
         self.Y += self.bias
         return self.Y
 
-    def backward(self, err_delta):
+    def backward(self, err_delta, learning_rate):
         self.E = err_delta
         err_delta = np.zeros(self.input_shape)
         for i in range(self.input_shape):
@@ -43,6 +43,6 @@ class FullyConnect(Layer):
 
         for i in range(self.units):
             for j in range(self.input_shape):
-                self.W[j][i] -= 0.02 * self.E[i] * self.X[j]
+                self.W[j][i] -= learning_rate * self.E[i] * self.X[j]
 
         return err_delta
