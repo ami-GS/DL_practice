@@ -4,9 +4,6 @@ from layer import Layer
 class Activation(Layer):
     def __init__(self):
         super(Activation, self).__init__()
-    
-    def update(self, learning_rate):
-        pass
 
 class Sigmoid(Activation):
     def __init__(self):
@@ -43,5 +40,21 @@ class ReLU(Activation):
                 err_delta[i] = 0
             else:
                 err_delta[i] *= np.random.uniform(0,1,1)
+
+        return err_delta
+
+class Tanh(Activation):
+    def __init__(self):
+        super(Tanh, self).__init__()
+
+    def forward(self, x):
+        for i in range(self.units):
+            self.Y[i] = np.tanh(x[i])
+
+        return self.Y
+
+    def backward(self, err_delta, learning_rate):
+        for i in range(self.units):
+            err_delta[i] *= 1-self.Y[i]**2
 
         return err_delta
