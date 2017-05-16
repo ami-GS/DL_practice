@@ -18,11 +18,7 @@ class MSE(Loss):
     def calc(self, X, label):
         if len(X.shape) != 1 or X.shape != label.shape:
             print "loss error"
-
-        Y = np.zeros(X.shape)
-        for i in range(X.shape[0]):
-            Y[i] = np.power(np.abs(X[i] - label[i]), 2)
-
+        Y = np.power(np.abs(X-label), 2)
         return np.sum(Y)*0.5
 
 

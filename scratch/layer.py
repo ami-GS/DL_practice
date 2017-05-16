@@ -28,9 +28,8 @@ class FullyConnect(Layer):
     def forward(self, x):
         self.X = x
         self.Y = np.zeros(self.units)
-        for i in range(self.input_shape):
-            for j in range(self.units):
-                self.Y[j] += x[i]*self.W[i][j]
+        for i in range(self.units):
+            self.Y[i] =  np.sum(np.dot(x, self.W[:,i]))
         self.Y += self.bias
         return self.Y
 
@@ -38,11 +37,9 @@ class FullyConnect(Layer):
         self.E = err_delta
         err_delta = np.zeros(self.input_shape)
         for i in range(self.input_shape):
-            for j in range(self.units):
-                err_delta[i] += self.E[j] * self.W[i][j]
+            err_delta[i] = np.sum(np.dot(self.E, self.W[i,:]))
 
         for i in range(self.units):
-            for j in range(self.input_shape):
-                self.W[j][i] -= learning_rate * self.E[i] * self.X[j]
+            self.W[:,i] -= np.sum(np.multiply(learning_rate * self.E[i], self.X))
 
         return err_delta

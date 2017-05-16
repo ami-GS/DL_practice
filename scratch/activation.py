@@ -10,8 +10,7 @@ class Sigmoid(Activation):
         super(Sigmoid, self).__init__()
 
     def forward(self, x):
-        for j in range(self.units):
-            self.Y[j] = 1.0/(1.0 + np.exp(-x[j]))
+        self.Y = np.reciprocal(1 + np.exp(-x))
 
         return self.Y
 
@@ -26,8 +25,7 @@ class ReLU(Activation):
         super(ReLU, self).__init__()
 
     def forward(self, x):
-        for j in range(self.units):
-            self.Y[j] = max(0, x[j])
+        np.multiply(np.greater_equal(x, 0), x, self.Y)
 
         return self.Y
 
@@ -48,13 +46,12 @@ class Tanh(Activation):
         super(Tanh, self).__init__()
 
     def forward(self, x):
-        for i in range(self.units):
-            self.Y[i] = np.tanh(x[i])
+        np.tanh(x, self.Y)
 
         return self.Y
 
     def backward(self, err_delta, learning_rate):
-        for i in range(self.units):
-            err_delta[i] *= 1-self.Y[i]**2
+        self.E = err_delta
+        np.multiply(err_delta, 1 - np.power(self.Y, 2), err_delta)
 
         return err_delta
