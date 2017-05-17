@@ -27,17 +27,13 @@ class FullyConnect(Layer):
 
     def forward(self, x):
         self.X = x
-        self.Y = np.zeros(self.units)
-        for i in range(self.units):
-            self.Y[i] =  np.sum(np.dot(x, self.W[:,i]))
+        self.Y = x.dot(self.W)
         self.Y += self.bias
         return self.Y
 
     def backward(self, err_delta, learning_rate):
         self.E = err_delta
-        err_delta = np.zeros(self.input_shape)
-        for i in range(self.input_shape):
-            err_delta[i] = np.sum(np.dot(self.E, self.W[i,:]))
+        err_delta = self.E.dot(self.W.T)
 
         for i in range(self.units):
             self.W[:,i] -= np.sum(np.multiply(learning_rate * self.E[i], self.X))
