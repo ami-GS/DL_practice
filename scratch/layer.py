@@ -34,8 +34,6 @@ class FullyConnect(Layer):
     def backward(self, err_delta, learning_rate):
         self.E = err_delta
         err_delta = self.E.dot(self.W.T)
-
-        for i in range(self.units):
-            self.W[:,i] -= np.sum(np.multiply(learning_rate * self.E[i], self.X))
+        np.subtract(self.W, np.outer(self.X, learning_rate * self.E), self.W)
 
         return err_delta

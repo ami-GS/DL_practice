@@ -18,8 +18,7 @@ class MSE(Loss):
     def calc(self, X, label):
         if len(X.shape) != 1 or X.shape != label.shape:
             print "loss error"
-        Y = np.power(np.abs(X-label), 2)
-        return np.sum(Y)*0.5
+        return np.sum(np.power(np.abs(X-label), 2))*0.5
 
 
     def partial_derivative(self, X, label):

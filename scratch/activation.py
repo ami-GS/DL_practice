@@ -16,8 +16,7 @@ class Sigmoid(Activation):
 
     def backward(self, err_delta, learning_rate):
         self.E = err_delta
-        for i in range(self.units):
-            err_delta[i] *= self.Y[i] * (1 - self.Y[i])
+        err_delta = np.multiply(err_delta, np.multiply(self.Y, 1-self.Y))
         return err_delta
 
 class ReLU(Activation):
@@ -31,13 +30,7 @@ class ReLU(Activation):
 
     def backward(self, err_delta, learning_rate):
         self.E = err_delta
-        for i in range(self.units):
-            if self.Y[i] > 0:
-                err_delta[i] *= 1
-            elif self.Y[i] < 0:
-                err_delta[i] = 0
-            else:
-                err_delta[i] *= np.random.uniform(0,1,1)
+        err_delta *= np.greater(self.Y, 0)*1
 
         return err_delta
 
