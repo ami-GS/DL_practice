@@ -10,6 +10,7 @@ class Sigmoid(Activation):
         super(Sigmoid, self).__init__()
 
     def forward(self, x):
+        # destructive assignment
         self.Y = np.reciprocal(1 + np.exp(-x))
 
         return self.Y
@@ -24,7 +25,8 @@ class ReLU(Activation):
         super(ReLU, self).__init__()
 
     def forward(self, x):
-        np.multiply(np.greater_equal(x, 0), x, self.Y)
+        # destructive assignment
+        self.Y = np.multiply(np.greater_equal(x, 0), x)
 
         return self.Y
 
@@ -39,7 +41,8 @@ class Tanh(Activation):
         super(Tanh, self).__init__()
 
     def forward(self, x):
-        np.tanh(x, self.Y)
+        # destructive assignment
+        self.Y = np.tanh(x)
 
         return self.Y
 
