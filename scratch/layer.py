@@ -69,6 +69,43 @@ class Conv2D(Layer):
 
         return err_delta
 
+class MaxPooling2D(Layer):
+    def __init__(self, kernel_size, strides=(1,1)):
+        super(MaxPooling2D, self).__init__()
+        self.kernel_size = kernel_size
+        self.strides = strides
+
+    def forward(self, x):
+        self.X = x
+        self.x_rowcol = int(np.sqrt(self.input_shape))
+        self.y_rowcol = self.x_rowcol - self.kernel_size+1
+        self.channel = x.shape[0]
+        self.maxLocs = np.zeros((self.channel, self.y_rowcol, self.y_rowcol, 2))
+        # TODO: workaround
+        self.Y = np.zeros((self.channel, self.y_rowcol, self.y_rowcol))
+
+        for c in range(self.channel):
+            for xi in range(0, self.y_rowcol, self.strides[0]):
+                for xj in range(0, self.y_rowcol, self.strides[1]):
+                    tmp = np.argmax(self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size])
+                    self.maxLocs[c, xi, xj, :] = [tmp%self.kernel_size, tmp/self.kernel_size]
+                    self.Y[c, xi, xj] = np.max(self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size])
+        return self.Y
+
+    def backward(self, err_delta, learning_rate):
+        if len(err_delta.shape) != 3:
+            err_delta = err_delta.reshpae((self.channel, self.y_rowcol, self.y_rowcol))
+        self.E = err_delta
+        err_delta = np.zeros((self.channel, self.x_rowcol, self.x_rowcol))
+        print err_delta.shape
+
+        for c in range(self.channel):
+            for xi in range(self.y_rowcol):
+                for xj in range(self.y_rowcol):
+                    err_delta[c, xi+self.maxLocs[c,xi,xj,0], xj+self.maxLocs[c,xi,xj,1]] += self.E[c, xi, xj]
+
+        return err_delta
+
 
 class FullyConnect(Layer):
     def __init__(self, units, input_shape):
