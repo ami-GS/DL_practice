@@ -1,4 +1,5 @@
 import numpy as np
+from layer import MaxPooling2D, Conv2D
 from activation import Activation
 from loss import MSE
 
@@ -9,15 +10,18 @@ class Network:
         units = self.layers[0].units
         for i in range(len(self.layers)):
             layer = self.layers[i]
+            layer.X = np.zeros(layer.input_shape)
+            layer.Y = np.zeros(layer.units)
+            layer.E = np.zeros(layer.units)
             if i >= 1:
                 layer.input_shape = units
                 if isinstance(layer, Activation):
                     layer.units = units
-            layer.X = np.zeros(layer.input_shape)
-            layer.Y = np.zeros(layer.units)
-            layer.E = np.zeros(layer.units)
+                elif isinstance(layer, MaxPooling2D) or isinstance(layer, Conv2D):
+                    tmp = layer.input_shape - layer.kernel_size + 1
+                    layer.Y = np.zeros((1, tmp, tmp))
+                    layer.units = tmp**2
             units = layer.units
-
         # current value
         self.Y = None
 
