@@ -29,38 +29,42 @@ class Conv2D(Layer):
         # size is valid
         self.units = int(np.sqrt(self.input_shape)) - self.kernel_size + 1
         self.units *= self.units
+        if input_shape:
+            self.x_rowcol = int(np.sqrt(self.input_shape))
+            self.y_rowcol = self.x_rowcol - self.kernel_size+1
 
     def forward(self, x):
         self.X = x
         if len(x.shape) >= 2:
             self.channel = x.shape[0]
 
-        self.x_rowcol = int(np.sqrt(self.input_shape))
-        self.y_rowcol = self.x_rowcol - self.kernel_size+1
+        if self.x_rowcol:
+            self.x_rowcol = int(np.sqrt(self.input_shape))
+            self.y_rowcol = self.x_rowcol - self.kernel_size+1
 
         self.X = np.reshape(self.X, (self.channel, self.x_rowcol, self.x_rowcol))
         self.Y = np.zeros((self.filterNum, self.y_rowcol, self.y_rowcol))
         for f in range(self.filterNum):
             for c in range(self.channel):
-                for xi in range(self.x_rowcol-self.kernel_size+1):
-                    for xj in range(self.x_rowcol-self.kernel_size+1):
+                for xi in range(0, self.y_rowcol, self.strides[0]):
+                    for xj in range(0, self.y_rowcol, self.strides[1]):
                         self.Y[f,xi,xj] = np.sum(np.multiply(self.X[c,xi:xi+self.kernel_size,xj:xj+self.kernel_size], self.filters[f,:,:]))
 
         return self.Y
 
     def backword(self, err_delta, learning_rate):
-        #self.E = err_delta
-        err_delta = err_delta.reshpae((self.filterNum, self.x_rowcol-self.kernel_size+1, self.x_rowcol-self.kernel_size+1))
-        self.E = err_delta.reshpae((self.filterNum, self.x_rowcol-self.kernel_size+1, self.x_rowcol-self.kernel_size+1))
+        if len(err_delta.shape) != 3:
+            err_delta = err_delta.reshpae((self.filterNum, self.y_rowcol, self.y_rowcol))
+        self.E = err_delta
 
-        for xi in range(self.x_rowcol-self.kernel_size+1):
-            for xj in range(self.x_rowcol-self.kernel_size+1):
+        for xi in range(self.y_rowcol):
+            for xj in range(self.y_rowcol):
                 err_delta[:, xi:xi+self.kernel_size, xj:xj+self.kernel_size] += self.E[:, xi, xj] * self.filters[:,:,:].T
 
         for f in range(self.filterNum):
             for c in range(self.channel):
-                for xi in range(self.x_rowcol-self.kernel_size+1):
-                    for xj in range(self.x_rowcol-self.kernel_size+1):
+                for xi in range(0, self.y_rowcol, self.strides[0]):
+                    for xj in range(0, self.y_rowcol, self.strides[1]):
                         self.filters[f,:,:] -= learning_rate * self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj]
 
         return err_delta
