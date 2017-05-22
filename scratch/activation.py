@@ -51,3 +51,27 @@ class Tanh(Activation):
         np.multiply(err_delta, 1 - np.power(self.Y, 2), err_delta)
 
         return err_delta
+
+
+class Softmax(Activation):
+    def __init__(self):
+        super(Softmax, self).__init__()
+
+    def forward(self, x):
+        original_shape = x.shape
+        if len(original_shape) >= 3:
+            # TODO : hardcoding
+            x = x.reshape((x.shape[0], x.shape[1]*x.shape[2]))
+        exp = np.exp(x)
+        r_expsum = np.reciprocal(np.sum(exp, axis=1))
+        self.Y = (exp.T*r_expsum).T
+
+        if len(original_shape) >= 3:
+            self.Y = self.Y.reshape(original_shape)
+
+        return self.Y
+
+    def backward(self, err_delta, learning_rate):
+        # pass through?
+        self.E = err_delta
+        return err_delta
