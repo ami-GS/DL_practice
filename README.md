@@ -5,7 +5,5 @@ practice repository for deep learning implementation
 - GAN
 - implement from scratch (python base)
   - TODO
-    - pooling
-    - convolution
     - optimizer
     - recurrent
