@@ -15,9 +15,10 @@ class MSE(Loss):
     def __init__(self):
         super(MSE, self).__init__()
 
-    def calc(self, X, label):
-        if len(X.shape) != 1 or X.shape != label.shape:
+    def calc(self, X, label, batch=0):
+        if batch==0 and (len(X.shape) != 1 or X.shape != label.shape):
             print "loss error"
+
         return np.sum(np.power(np.abs(X-label), 2))*0.5
 
 

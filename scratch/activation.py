@@ -9,7 +9,7 @@ class Sigmoid(Activation):
     def __init__(self):
         super(Sigmoid, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x, batch=0):
         # destructive assignment
         self.Y = np.reciprocal(1 + np.exp(-x))
 
@@ -24,7 +24,7 @@ class ReLU(Activation):
     def __init__(self):
         super(ReLU, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x, batch=0):
         # destructive assignment
         self.Y = np.multiply(np.greater_equal(x, 0), x)
 
@@ -40,7 +40,7 @@ class Tanh(Activation):
     def __init__(self):
         super(Tanh, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x, batch=0):
         # destructive assignment
         self.Y = np.tanh(x)
 
@@ -57,7 +57,7 @@ class Softmax(Activation):
     def __init__(self):
         super(Softmax, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x, batch=0):
         original_shape = x.shape
         if len(original_shape) >= 3:
             # TODO : hardcoding

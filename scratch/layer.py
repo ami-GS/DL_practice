@@ -11,7 +11,7 @@ class Layer(object):
         # error
         self.E = np.zeros(units)
 
-    def forward(self, x):
+    def forward(self, x, batch=0):
         pass
 
     def backward(self, err_delta, learning_rate):
@@ -33,7 +33,7 @@ class Conv2D(Layer):
             self.x_rowcol = int(np.sqrt(self.input_shape))
             self.y_rowcol = self.x_rowcol - self.kernel_size+1
 
-    def forward(self, x):
+    def forward(self, x, batch=0):
         self.X = x
         if len(x.shape) >= 2:
             self.channel = x.shape[0]
@@ -75,7 +75,7 @@ class MaxPooling2D(Layer):
         self.kernel_size = kernel_size
         self.strides = strides
 
-    def forward(self, x):
+    def forward(self, x, batch=0):
         self.X = x
         self.x_rowcol = int(np.sqrt(self.input_shape))
         self.y_rowcol = self.x_rowcol - self.kernel_size+1
@@ -97,7 +97,6 @@ class MaxPooling2D(Layer):
             err_delta = err_delta.reshpae((self.channel, self.y_rowcol, self.y_rowcol))
         self.E = err_delta
         err_delta = np.zeros((self.channel, self.x_rowcol, self.x_rowcol))
-        print err_delta.shape
 
         for c in range(self.channel):
             for xi in range(self.y_rowcol):
@@ -114,8 +113,11 @@ class FullyConnect(Layer):
         self.bias = np.random.uniform(-1, 1, 1)
         self.original_shape = None
 
-    def forward(self, x):
-        if len(x.shape) > 1:
+    def forward(self, x, batch=0):
+        # for 2D data (like image)
+        # batch == 0 is workaround
+        self.batch = batch
+        if len(x.shape) > 1 and batch == 0:
             self.original_shape = x.shape
             x = np.ravel(x)
         self.X = x
@@ -126,7 +128,10 @@ class FullyConnect(Layer):
     def backward(self, err_delta, learning_rate):
         self.E = err_delta
         err_delta = self.E.dot(self.W.T)
-        np.subtract(self.W, np.outer(self.X, learning_rate * self.E), self.W)
+        if self.batch:
+            np.subtract(self.W, np.sum(np.einsum("bi,bj->bij", self.X, learning_rate*self.E), axis=0), self.W)
+        else:
+            np.subtract(self.W, np.outer(self.X, learning_rate * self.E), self.W)
 
         if self.original_shape:
             err_delta = err_delta.reshape(self.original_shape)
