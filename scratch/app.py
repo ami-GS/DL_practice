@@ -5,48 +5,61 @@ from loss import MSE
 import numpy as np
 
 if __name__ == "__main__":
-    last_units = 2
-    epoch = 1000
-    dataNum = 100000
-    batchSize = 10
+    dataNum = 1000
 
     # 8*8 image
     input_shape = 64
+    last_units = 1
     dataset = np.zeros((dataNum, input_shape))
-    dataset[:dataNum/2,:] = np.random.uniform(-1, -2, (dataNum/2,input_shape))
-    dataset[dataNum/2:,:] = np.random.uniform(1, 2, (dataNum/2,input_shape))
+    dataset[:dataNum/2,:] = np.random.uniform(-1, 0, (dataNum/2,input_shape))
+    dataset[dataNum/2:,:] = np.random.uniform(0, 1, (dataNum/2,input_shape))
+
+    label = np.zeros((dataNum, last_units))
+    label[:dataNum/2,:] = np.ones((dataNum/2, last_units))
+
+    net = Network(
+        [Conv2D(4, 1, 3, input_shape=input_shape), # 64 * 4 -> 36*4
+         ReLU(),
+         MaxPooling2D(2), # 6*6*4 -> 5*5*4
+         FullyConnect(units=last_units, input_shape=100)])
+         #FullyConnect(units=last_units, input_shape=144)])
+    for i in range(dataNum):
+        net.train(dataset[i], label[i], loss=MSE(), learning_rate=0.02)
+        
+
+    """
+    # 100 epoch 10 batch  8*8 image
+    epoch = 100
+    batchSize = 10
+
+    input_shape = 4
+    last_units = 2
+    dataset = np.zeros((dataNum, input_shape))
+    dataset[:dataNum/2,:] = np.random.uniform(1, 2, (dataNum/2,input_shape))
+    dataset[dataNum/2:,:] = np.random.uniform(3, 4, (dataNum/2,input_shape))
     
     label = np.zeros((dataNum, last_units))
     label[:dataNum/2,:] = np.ones((dataNum/2, last_units))
 
-    """
-    net = Network(
-        [Conv2D(4, 1, 3, input_shape=input_shape),
-         Softmax(),
-         MaxPooling2D(2),
-         FullyConnect(units=last_units, input_shape=100)]) # 5*5* 4filter
-    """
-
     net = Network(
         [FullyConnect(input_shape*2, input_shape),
          ReLU(),
-         Softmax(),
-         FullyConnect(units=last_units, input_shape=input_shape*2)], batch = batchSize)
-
-    for e in range(epoch):
-        for batchIdx in range(0, batchSize, dataNum):
-            batchData = dataset[batchIdx:batchIdx + batchSize]
-            batchLabel = label[batchIdx:batchIdx + batchSize]
-            net.train(batchData, batchLabel)
-            err = net.train(batchData, batchLabel, loss=MSE(), learning_rate=0.02)
-            if e%100 == 0:
-                print "epoch", e
-                print "\t", err
+         FullyConnect(input_shape/2, input_shape*2),
+         ReLU(),
+         FullyConnect(units=last_units, input_shape=input_shape/2),
+         ], batch = batchSize)
     
-    #for x in dataset:
-        #    print net.predict(x)
+    for e in range(epoch):
+        err = 0
+        for batchIdx in range(0, dataNum, batchSize):
+            batchData = dataset[batchIdx:batchIdx + batchSize, :]
+            batchLabel = label[batchIdx:batchIdx + batchSize, :]
+            err += net.train(batchData, batchLabel, loss=MSE(), learning_rate=0.02)
+        if e == 0 or (e+1)%50 == 0:
+            print "epoch", e+1
+            print "\t", err
+    """
+    
     print net.predict(dataset[0, :]), label[0,:]
     print net.predict(dataset[dataNum-1, :]), label[dataNum-1,:]
-
-
-                
+    #ans = net.predict(dataset[:,:], batchSize)

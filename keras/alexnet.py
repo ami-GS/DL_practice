@@ -1,4 +1,3 @@
-from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D, Dense
 from keras.losses import categorical_crossentropy

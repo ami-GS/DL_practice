@@ -116,13 +116,16 @@ class FullyConnect(Layer):
     def forward(self, x, batch=0):
         # for 2D data (like image)
         # batch == 0 is workaround
+        print x.shape, "1"
         self.batch = batch
         if len(x.shape) > 1 and batch == 0:
             self.original_shape = x.shape
             x = np.ravel(x)
         self.X = x
+        print self.X.shape, "2"
         self.Y = x.dot(self.W)
         self.Y += self.bias
+        print self.X.shape, self.W.shape, self.Y.shape
         return self.Y
 
     def backward(self, err_delta, learning_rate):

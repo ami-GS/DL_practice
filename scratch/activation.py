@@ -27,13 +27,12 @@ class ReLU(Activation):
     def forward(self, x, batch=0):
         # destructive assignment
         self.Y = np.multiply(np.greater_equal(x, 0), x)
-
+        print x.shape, self.Y.shape
         return self.Y
 
     def backward(self, err_delta, learning_rate):
         self.E = err_delta
         err_delta *= np.greater(self.Y, 0)*1
-
         return err_delta
 
 class Tanh(Activation):
