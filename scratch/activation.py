@@ -63,7 +63,10 @@ class Softmax(Activation):
             # TODO : hardcoding
             x = x.reshape((x.shape[0], x.shape[1]*x.shape[2]))
         exp = np.exp(x)
-        r_expsum = np.reciprocal(np.sum(exp, axis=1))
+        if batch:
+            r_expsum = np.reciprocal(np.sum(exp, axis=1))
+        else:
+            r_expsum = np.reciprocal(np.sum(exp))
         self.Y = (exp.T*r_expsum).T
 
         if len(original_shape) >= 3:
