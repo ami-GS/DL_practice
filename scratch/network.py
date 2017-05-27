@@ -39,14 +39,23 @@ class Network:
                 layer.Y = np.zeros((batch, layer.units))
                 layer.E = np.zeros((batch, layer.units))
                 units = layer.units
-
         # current value
         self.Y = None
+        self.last_units = units
 
-    def predict(self, X):
-        self.Y = X
-        for layer in self.layers:
-            self.Y = layer.forward(self.Y)
+    def predict(self, X, batch=0):
+        if batch:
+            ans = np.zeros((X.shape[0], self.last_units))
+            for i in range(0, X.shape[0], batch):
+                tmp = X[i:i+batch, :]
+                for layer in self.layers:
+                    tmp = layer.forward(tmp, batch)
+                ans[i:i+batch, :] = tmp
+            return ans
+        else:
+            self.Y = X
+            for layer in self.layers:
+                self.Y = layer.forward(self.Y)
         return self.Y
 
     def train(self, X, label, loss=MSE(), learning_rate=0.02):
