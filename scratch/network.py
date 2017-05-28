@@ -4,14 +4,17 @@ from activation import Activation
 from loss import MSE
 
 class Network:
-    def __init__(self, layers=None, batch=0):
+    def __init__(self, layers=None, batch=0, learning_rate=0.02):
         self.layers = layers
         self.batch = batch
+        self.learning_rate = learning_rate
         self.input_shape = layers[0].input_shape
         units = self.layers[0].units
         if self.batch == 0:
             for i in range(len(self.layers)):
                 layer = self.layers[i]
+                layer.batch = batch
+                layer.learning_rate = learning_rate
                 layer.X = np.zeros(layer.input_shape)
                 layer.Y = np.zeros(layer.units)
                 layer.E = np.zeros(layer.units)
@@ -43,14 +46,14 @@ class Network:
         self.Y = None
         self.last_units = units
 
-    def predict(self, X, batch=0):
-        if batch:
+    def predict(self, X):
+        if self.batch:
             ans = np.zeros((X.shape[0], self.last_units))
-            for i in range(0, X.shape[0], batch):
-                tmp = X[i:i+batch, :]
+            for i in range(0, X.shape[0], self.batch):
+                tmp = X[i:i+self.batch, :]
                 for layer in self.layers:
-                    tmp = layer.forward(tmp, batch)
-                ans[i:i+batch, :] = tmp
+                    tmp = layer.forward(tmp)
+                ans[i:i+self.batch, :] = tmp
             return ans
         else:
             self.Y = X
@@ -58,14 +61,14 @@ class Network:
                 self.Y = layer.forward(self.Y)
         return self.Y
 
-    def train(self, X, label, loss=MSE(), learning_rate=0.02):
+    def train(self, X, label, batch=0, loss=MSE(), learning_rate=0.02):
         self.Y = X
         for layer in self.layers:
-            self.Y = layer.forward(self.Y, self.batch)
+            self.Y = layer.forward(self.Y)
 
         err = loss.calc(self.Y, label, self.batch)
         err_delta = loss.partial_derivative(self.Y, label)
         for layer in self.layers[::-1]:
-            err_delta = layer.backward(err_delta, learning_rate)
+            err_delta = layer.backward(err_delta)
 
         return err

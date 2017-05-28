@@ -6,6 +6,7 @@ import numpy as np
 
 if __name__ == "__main__":
     dataNum = 1000
+    learning_rate = 0.02
 
     # 8*8 image
     input_shape = 64
@@ -21,8 +22,9 @@ if __name__ == "__main__":
         [Conv2D(4, 1, 3, input_shape=input_shape), # 64 * 4 -> 36*4
          ReLU(),
          MaxPooling2D(2), # 6*6*4 -> 5*5*4
-         FullyConnect(units=last_units, input_shape=100)])
+         FullyConnect(units=last_units, input_shape=100)],
          #FullyConnect(units=last_units, input_shape=144)])
+        learning_rate = learning_rate)
     for i in range(dataNum):
         net.train(dataset[i], label[i], loss=MSE(), learning_rate=0.02)
         
@@ -46,15 +48,16 @@ if __name__ == "__main__":
          ReLU(),
          FullyConnect(input_shape/2, input_shape*2),
          ReLU(),
-         FullyConnect(units=last_units, input_shape=input_shape/2),
-         ], batch = batchSize)
+         FullyConnect(units=last_units, input_shape=input_shape/2)],
+        batch = batchSize,
+        learning_rate = learning_rate,)
     
     for e in range(epoch):
         err = 0
         for batchIdx in range(0, dataNum, batchSize):
             batchData = dataset[batchIdx:batchIdx + batchSize, :]
             batchLabel = label[batchIdx:batchIdx + batchSize, :]
-            err += net.train(batchData, batchLabel, loss=MSE(), learning_rate=0.02)
+            err += net.train(batchData, batchLabel, loss=MSE())
         if e == 0 or (e+1)%50 == 0:
             print "epoch", e+1
             print "\t", err

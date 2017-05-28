@@ -11,10 +11,10 @@ class Layer(object):
         # error
         self.E = np.zeros(units)
 
-    def forward(self, x, batch=0):
+    def forward(self, x):
         pass
 
-    def backward(self, err_delta, learning_rate):
+    def backward(self, err_delta):
         pass
 
 
@@ -33,7 +33,7 @@ class Conv2D(Layer):
             self.x_rowcol = int(np.sqrt(self.input_shape))
             self.y_rowcol = self.x_rowcol - self.kernel_size+1
 
-    def forward(self, x, batch=0):
+    def forward(self, x):
         self.X = x
         if len(x.shape) >= 2:
             self.channel = x.shape[0]
@@ -52,7 +52,7 @@ class Conv2D(Layer):
 
         return self.Y
 
-    def backword(self, err_delta, learning_rate):
+    def backword(self, err_delta):
         if len(err_delta.shape) != 3:
             err_delta = err_delta.reshpae((self.filterNum, self.y_rowcol, self.y_rowcol))
         self.E = err_delta
@@ -65,7 +65,7 @@ class Conv2D(Layer):
             for c in range(self.channel):
                 for xi in range(0, self.y_rowcol, self.strides[0]):
                     for xj in range(0, self.y_rowcol, self.strides[1]):
-                        self.filters[f,:,:] -= learning_rate * self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj]
+                        self.filters[f,:,:] -= self.learning_rate * self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj]
 
         return err_delta
 
@@ -75,7 +75,7 @@ class MaxPooling2D(Layer):
         self.kernel_size = kernel_size
         self.strides = strides
 
-    def forward(self, x, batch=0):
+    def forward(self, x):
         self.X = x
         self.x_rowcol = int(np.sqrt(self.input_shape))
         self.y_rowcol = self.x_rowcol - self.kernel_size+1
@@ -92,7 +92,7 @@ class MaxPooling2D(Layer):
                     self.Y[c, xi, xj] = np.max(self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size])
         return self.Y
 
-    def backward(self, err_delta, learning_rate):
+    def backward(self, err_delta):
         if len(err_delta.shape) != 3:
             err_delta = err_delta.reshpae((self.channel, self.y_rowcol, self.y_rowcol))
         self.E = err_delta
@@ -113,28 +113,24 @@ class FullyConnect(Layer):
         self.bias = np.random.uniform(-1, 1, 1)
         self.original_shape = None
 
-    def forward(self, x, batch=0):
+    def forward(self, x):
         # for 2D data (like image)
         # batch == 0 is workaround
-        print x.shape, "1"
-        self.batch = batch
-        if len(x.shape) > 1 and batch == 0:
+        if len(x.shape) > 1 and self.batch == 0:
             self.original_shape = x.shape
             x = np.ravel(x)
         self.X = x
-        print self.X.shape, "2"
         self.Y = x.dot(self.W)
         self.Y += self.bias
-        print self.X.shape, self.W.shape, self.Y.shape
         return self.Y
 
-    def backward(self, err_delta, learning_rate):
+    def backward(self, err_delta):
         self.E = err_delta
         err_delta = self.E.dot(self.W.T)
         if self.batch:
-            np.subtract(self.W, np.sum(np.einsum("bi,bj->bij", self.X, learning_rate*self.E), axis=0), self.W)
+            np.subtract(self.W, np.sum(np.einsum("bi,bj->bij", self.X, self.learning_rate*self.E), axis=0), self.W)
         else:
-            np.subtract(self.W, np.outer(self.X, learning_rate * self.E), self.W)
+            np.subtract(self.W, np.outer(self.X, self.learning_rate * self.E), self.W)
 
         if self.original_shape:
             err_delta = err_delta.reshape(self.original_shape)
