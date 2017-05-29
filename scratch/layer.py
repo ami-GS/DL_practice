@@ -116,7 +116,7 @@ class FullyConnect(Layer):
     def forward(self, x):
         # for 2D data (like image)
         # batch == 0 is workaround
-        if len(x.shape) > 1 and self.batch == 0:
+        if len(x.shape) > 1 and self.batch == 1:
             self.original_shape = x.shape
             x = np.ravel(x)
         self.X = x
@@ -127,7 +127,7 @@ class FullyConnect(Layer):
     def backward(self, err_delta):
         self.E = err_delta
         err_delta = self.E.dot(self.W.T)
-        if self.batch:
+        if self.batch > 1:
             np.subtract(self.W, np.sum(np.einsum("bi,bj->bij", self.X, self.learning_rate*self.E), axis=0), self.W)
         else:
             np.subtract(self.W, np.outer(self.X, self.learning_rate * self.E), self.W)
