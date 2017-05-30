@@ -110,6 +110,7 @@ class FullyConnect(Layer):
     def __init__(self, units, input_shape):
         super(FullyConnect, self).__init__(input_shape, units)
         self.W = np.random.uniform(-1, 1, (input_shape, units))
+        # TODO : sharing bias to all batch
         self.bias = np.random.uniform(-1, 1, 1)
         self.original_shape = None
 
@@ -120,8 +121,7 @@ class FullyConnect(Layer):
             self.original_shape = x.shape
             x = np.ravel(x)
         self.X = x
-        self.Y = x.dot(self.W)
-        self.Y += self.bias
+        self.Y = x.dot(self.W) + self.bias
         return self.Y
 
     def backward(self, err_delta):
@@ -129,8 +129,11 @@ class FullyConnect(Layer):
         err_delta = self.E.dot(self.W.T)
         if self.batch > 1:
             np.subtract(self.W, np.sum(np.einsum("bi,bj->bij", self.X, self.learning_rate*self.E), axis=0), self.W)
+            # TODO : sharing bias to all batch
+            #self.bias -= np.sum(self.learning_rate * self.E)
         else:
             np.subtract(self.W, np.outer(self.X, self.learning_rate * self.E), self.W)
+            self.bias -= np.sum(self.learning_rate * self.E, axis=1)
 
         if self.original_shape:
             err_delta = err_delta.reshape(self.original_shape)
