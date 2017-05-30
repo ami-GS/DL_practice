@@ -7,3 +7,4 @@ practice repository for deep learning implementation
   - TODO
     - optimizer
     - recurrent
+    - batch

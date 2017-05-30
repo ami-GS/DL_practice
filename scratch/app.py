@@ -50,7 +50,7 @@ if __name__ == "__main__":
          ReLU(),
          FullyConnect(units=last_units, input_shape=input_shape/2)],
         batch = batchSize,
-        learning_rate = learning_rate,)
+        learning_rate = learning_rate)
     
     for e in range(epoch):
         err = 0
