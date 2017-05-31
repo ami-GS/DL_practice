@@ -52,7 +52,7 @@ class Conv2D(Layer):
 
         return self.Y
 
-    def backword(self, err_delta):
+    def backward(self, err_delta):
         if len(err_delta.shape) != 3:
             err_delta = err_delta.reshpae((self.filterNum, self.y_rowcol, self.y_rowcol))
         self.E = err_delta
