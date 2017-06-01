@@ -5,6 +5,6 @@ practice repository for deep learning implementation
 - GAN
 - implement from scratch (python base)
   - TODO
-    - optimizer
+    - optimizer (partially done)
     - recurrent
-    - batch
+    - batch (partially done)
