@@ -65,7 +65,8 @@ class Conv2D(Layer):
             for c in range(self.channel):
                 for xi in range(0, self.y_rowcol, self.strides[0]):
                     for xj in range(0, self.y_rowcol, self.strides[1]):
-                        self.filters[f,:,:] -= self.learning_rate * self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj]
+                        self.filters[f,:,:] -= self.optimizer(self.learning_rate, self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj])
+                        #self.filters[f,:,:] -= self.learning_rate * self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj]
 
         return err_delta
 
@@ -127,13 +128,21 @@ class FullyConnect(Layer):
     def backward(self, err_delta):
         self.E = err_delta
         err_delta = self.E.dot(self.W.T)
+
+        # updates
         if self.batch > 1:
-            np.subtract(self.W, np.sum(np.einsum("bi,bj->bij", self.X, self.learning_rate*self.E), axis=0), self.W)
+            np.subtract(self.W, self.optimizer(np.sum(np.einsum("bi,bj->bij", self.X, self.learning_rate*self.E), axis=0)), self.W)
             # TODO : sharing bias to all batch
-            #self.bias -= np.sum(self.learning_rate * self.E)
+            self.bias -= np.sum(self.learning_rate * self.E)
         else:
-            np.subtract(self.W, np.outer(self.X, self.learning_rate * self.E), self.W)
-            self.bias -= np.sum(self.learning_rate * self.E, axis=1)
+            np.subtract(self.W, self.optimizer(np.outer(self.X, self.learning_rate * self.E)), self.W)
+            if len(self.E) >= 2:
+                self.bias -= np.sum(self.learning_rate * self.E, axis=1)
+                #self.bias -= self.optimizer(np.sum(self.learning_rate * self.E, axis=1))
+            else:
+                # TODO : just workaround for shape = (1)
+                self.bias -= np.sum(self.learning_rate * self.E)
+                #self.bias -= self.optimizer(np.sum(self.learning_rate * self.E))
 
         if self.original_shape:
             err_delta = err_delta.reshape(self.original_shape)

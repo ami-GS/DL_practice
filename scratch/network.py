@@ -2,9 +2,10 @@ import numpy as np
 from layer import MaxPooling2D, Conv2D
 from activation import Activation
 from loss import MSE
+import copy
 
 class Network:
-    def __init__(self, layers=None, batch=1, learning_rate=0.02):
+    def __init__(self, layers=None, batch=1, learning_rate=0.02, optimizer=PassThrough()):
         self.layers = layers
         self.batch = batch
         self.learning_rate = learning_rate
@@ -14,6 +15,7 @@ class Network:
             layer = self.layers[i]
             layer.learning_rate = learning_rate
             layer.batch = batch
+            layer.optimizer = copy.deepcopy(optimizer)
             if i >= 1:
                 layer.input_shape = units
                 if isinstance(layer, Activation):
