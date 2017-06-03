@@ -1,6 +1,7 @@
 import numpy as np
 from layer import MaxPooling2D, Conv2D
 from activation import Activation
+from optimizer import PassThrough
 from loss import MSE
 import copy
 
