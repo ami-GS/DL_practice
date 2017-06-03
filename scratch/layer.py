@@ -56,17 +56,19 @@ class Conv2D(Layer):
         if len(err_delta.shape) != 3:
             err_delta = err_delta.reshpae((self.filterNum, self.y_rowcol, self.y_rowcol))
         self.E = err_delta
+        err_delta = np.zeros((self.channel, self.x_rowcol, self.x_rowcol))
 
-        for xi in range(self.y_rowcol):
-            for xj in range(self.y_rowcol):
-                err_delta[:, xi:xi+self.kernel_size, xj:xj+self.kernel_size] += self.E[:, xi, xj] * self.filters[:,:,:].T
+        for f in range(self.filterNum):
+            for c in range(self.channel):
+                for xi in range(self.y_rowcol):
+                    for xj in range(self.y_rowcol):
+                        err_delta[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] = np.add(err_delta[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size], self.E[f, xi, xj] * self.filters[f,:,:])
 
         for f in range(self.filterNum):
             for c in range(self.channel):
                 for xi in range(0, self.y_rowcol, self.strides[0]):
                     for xj in range(0, self.y_rowcol, self.strides[1]):
-                        self.filters[f,:,:] -= self.optimizer(self.learning_rate, self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj])
-                        #self.filters[f,:,:] -= self.learning_rate * self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj]
+                        self.filters[f,:,:] -= self.optimizer(self.learning_rate * self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] * self.E[f,xi,xj])
 
         return err_delta
 
