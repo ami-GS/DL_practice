@@ -46,9 +46,9 @@ class Conv2D(Layer):
         self.Y = np.zeros((self.filterNum, self.y_rowcol, self.y_rowcol))
         for f in range(self.filterNum):
             for c in range(self.channel):
-                for xi in range(0, self.y_rowcol, self.strides[0]):
-                    for xj in range(0, self.y_rowcol, self.strides[1]):
-                        self.Y[f,xi,xj] = np.sum(np.multiply(self.X[c,xi:xi+self.kernel_size,xj:xj+self.kernel_size], self.filters[f,:,:]))
+                for yi in range(0, self.y_rowcol, self.strides[0]):
+                    for yj in range(0, self.y_rowcol, self.strides[1]):
+                        self.Y[f,yi,yj] = np.sum(np.multiply(self.X[c,yi:yi+self.kernel_size,yj:yj+self.kernel_size], self.filters[f,:,:]))
 
         return self.Y
 
@@ -58,19 +58,19 @@ class Conv2D(Layer):
         self.E = err_delta
         err_delta = np.zeros((self.channel, self.x_rowcol, self.x_rowcol))
 
-        for xi in range(self.y_rowcol):
-            for xj in range(self.y_rowcol):
-                err_delta[:, xi:xi+self.kernel_size, xj:xj+self.kernel_size] = np.add(
-                    err_delta[:, xi:xi+self.kernel_size, xj:xj+self.kernel_size],
-                    np.sum((self.E[:,xi,xj] * self.filters.T).T, axis=0))
+        for yi in range(self.y_rowcol):
+            for yj in range(self.y_rowcol):
+                err_delta[:, yi:yi+self.kernel_size, yj:yj+self.kernel_size] = np.add(
+                    err_delta[:, yi:yi+self.kernel_size, yj:yj+self.kernel_size],
+                    np.sum((self.E[:,yi,yj] * self.filters.T).T, axis=0))
 
-        for xi in range(0, self.y_rowcol, self.strides[0]):
-            for xj in range(0, self.y_rowcol, self.strides[1]):
+        for yi in range(0, self.y_rowcol, self.strides[0]):
+            for yj in range(0, self.y_rowcol, self.strides[1]):
                 self.filters -= self.optimizer(
                     self.learning_rate *
                     np.sum(np.sum(
-                            np.outer(self.E[:,xi,xj],
-                                     self.X[:,xi:xi+self.kernel_size, xj:xj+self.kernel_size]),
+                            np.outer(self.E[:,yi,yj],
+                                     self.X[:,yi:yi+self.kernel_size, yj:yj+self.kernel_size]),
                             axis=0).reshape((self.channel, self.kernel_size, self.kernel_size)),
                         axis=0))
 
@@ -92,11 +92,11 @@ class MaxPooling2D(Layer):
         self.Y = np.zeros((self.channel, self.y_rowcol, self.y_rowcol))
 
         for c in range(self.channel):
-            for xi in range(0, self.y_rowcol, self.strides[0]):
-                for xj in range(0, self.y_rowcol, self.strides[1]):
-                    tmp = np.argmax(self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size])
-                    self.maxLocs[c, xi, xj, :] = [tmp%self.kernel_size, tmp/self.kernel_size]
-                    self.Y[c, xi, xj] = np.max(self.X[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size])
+            for yi in range(0, self.y_rowcol, self.strides[0]):
+                for yj in range(0, self.y_rowcol, self.strides[1]):
+                    tmp = np.argmax(self.X[c, yi:yi+self.kernel_size, yj:yj+self.kernel_size])
+                    self.maxLocs[c, yi, yj, :] = [tmp%self.kernel_size, tmp/self.kernel_size]
+                    self.Y[c, yi, yj] = np.max(self.X[c, yi:yi+self.kernel_size, yj:yj+self.kernel_size])
         return self.Y
 
     def backward(self, err_delta):
@@ -106,9 +106,9 @@ class MaxPooling2D(Layer):
         err_delta = np.zeros((self.channel, self.x_rowcol, self.x_rowcol))
 
         for c in range(self.channel):
-            for xi in range(self.y_rowcol):
-                for xj in range(self.y_rowcol):
-                    err_delta[c, xi+self.maxLocs[c,xi,xj,0], xj+self.maxLocs[c,xi,xj,1]] += self.E[c, xi, xj]
+            for yi in range(self.y_rowcol):
+                for yj in range(self.y_rowcol):
+                    err_delta[c, yi+self.maxLocs[c,yi,yj,0], yj+self.maxLocs[c,yi,yj,1]] += self.E[c, yi, yj]
 
         return err_delta
 
