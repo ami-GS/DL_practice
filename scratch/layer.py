@@ -58,21 +58,21 @@ class Conv2D(Layer):
         self.E = err_delta
         err_delta = np.zeros((self.channel, self.x_rowcol, self.x_rowcol))
 
-        for c in range(self.channel):
-            for xi in range(self.y_rowcol):
-                for xj in range(self.y_rowcol):
-                    err_delta[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size] = np.add(
-                        err_delta[c, xi:xi+self.kernel_size, xj:xj+self.kernel_size],
-                        np.sum((self.E[:,xi,xj] * self.filters.T).T, axis=0))
+        for xi in range(self.y_rowcol):
+            for xj in range(self.y_rowcol):
+                err_delta[:, xi:xi+self.kernel_size, xj:xj+self.kernel_size] = np.add(
+                    err_delta[:, xi:xi+self.kernel_size, xj:xj+self.kernel_size],
+                    np.sum((self.E[:,xi,xj] * self.filters.T).T, axis=0))
 
-        for c in range(self.channel):
-            for xi in range(0, self.y_rowcol, self.strides[0]):
-                for xj in range(0, self.y_rowcol, self.strides[1]):
-                    self.filters -= self.optimizer(
-                        self.learning_rate *
-                        np.outer(self.E[:,xi,xj],
-                                 self.X[c, xi:xi+self.kernel_size,
-                                        xj:xj+self.kernel_size]).reshape(self.filters.shape))
+        for xi in range(0, self.y_rowcol, self.strides[0]):
+            for xj in range(0, self.y_rowcol, self.strides[1]):
+                self.filters -= self.optimizer(
+                    self.learning_rate *
+                    np.sum(np.sum(
+                            np.outer(self.E[:,xi,xj],
+                                     self.X[:,xi:xi+self.kernel_size, xj:xj+self.kernel_size]),
+                            axis=0).reshape((self.channel, self.kernel_size, self.kernel_size)),
+                        axis=0))
 
         return err_delta
 
