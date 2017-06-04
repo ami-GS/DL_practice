@@ -4,7 +4,4 @@ practice repository for deep learning implementation
 - autoencoder
 - GAN
 - implement from scratch (python base)
-  - TODO
-    - optimizer (partially done)
-    - recurrent
-    - batch (partially done)
+This move to another repository [here](https://github.com/ami-GS/scratchDL)
