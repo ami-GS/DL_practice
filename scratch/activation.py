@@ -64,7 +64,7 @@ class Softmax(Activation):
         if self.batch > 1:
             r_expsum = np.reciprocal(np.sum(exp, axis=1))
         else:
-            r_expsum = np.reciprocal(np.sum(exp))
+            r_expsum = np.reciprocal(np.sum(exp)+0.000000001)
         self.Y = (exp.T*r_expsum).T
 
         if len(original_shape) >= 3:
